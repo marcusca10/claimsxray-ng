@@ -43,13 +43,16 @@ export class TokenRequestComponent implements OnInit {
     // update request cache
     this.tokenParserService.setTokenRequest(this.model);
 
+    // check for existing querystring in the loginUrl
+    let querySeparator = this.model.loginUrl.includes('?') ? '&': '?';
+
     if (this.model.protocol == 'SAML') {
       this.monitoringService.logEvent('LoginRequest', { protocol: 'SAML', loginUrl: this.model.loginUrl, isRefresh: false });
-      window.location.href = `${this.model.loginUrl}?SAMLRequest=${Utilities.createSamlRequest(this.model.identifier, this.tokenParserService.replyHostProxy) }`;
+      window.location.href = `${this.model.loginUrl}${querySeparator}SAMLRequest=${Utilities.createSamlRequest(this.model.identifier, this.tokenParserService.replyHostProxy) }`;
     }
     else if (this.model.protocol == 'WS-Fed') {
       this.monitoringService.logEvent('LoginRequest', { protocol: 'WsFed', loginUrl: this.model.loginUrl, isRefresh: false });
-      window.location.href = `${this.model.loginUrl}?${Utilities.createWsFedRequest(this.model.identifier, this.tokenParserService.replyHostProxy)}`;
+      window.location.href = `${this.model.loginUrl}${querySeparator}${Utilities.createWsFedRequest(this.model.identifier, this.tokenParserService.replyHostProxy)}`;
     }
     else {
       this.monitoringService.logEvent('LoginRequest', { protocol: 'OIDC', loginUrl: this.model.loginUrl, isRefresh: false });
@@ -58,7 +61,7 @@ export class TokenRequestComponent implements OnInit {
         this.model.codeVerifier = request.verifier;
         // update request cache for PKCE
         this.tokenParserService.setTokenRequest(this.model);
-        window.location.href = `${this.model.loginUrl}?${request.data}`;
+        window.location.href = `${this.model.loginUrl}${querySeparator}${request.data}`;
       });
     }
   }
